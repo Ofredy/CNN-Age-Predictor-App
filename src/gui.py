@@ -13,13 +13,24 @@ class AgePredictorGUI:
 
     def __init__(self):
 
-        # Creating GUI window and initializing the configs
+        # Creating GUI window and initializing the window configs
         self.window = tk.Tk()
         self.window.title(WINDOW_NAME)
+        
+        # Initializing the make prediction bool
+        self.predict_age = False
 
         # Screenshot capture
         self._webcam_init()
         self._display_webcam()
+
+        # Displaying CougarAI logo once webcam has loaded
+        self.window_logo = tk.PhotoImage(file=LOGO_IMG_PATH)
+        self.window.iconphoto(False, self.window_logo)
+
+        # Displaying button to take picture and execute code
+        self.make_age_prediction_button = tk.Button(self.window, text=BUTTON_TEXT, command=self._predict_age_selected)
+        self.make_age_prediction_button.pack()
 
         # Commencing the GUI window loop
         self.window.mainloop()
@@ -58,8 +69,14 @@ class AgePredictorGUI:
         # Configure image in the label 
         self.cam_label.configure(image=photo_image) 
     
-        # Repeat the same process after every 10 seconds 
-        self.cam_label.after(10, self._display_webcam) 
+        if not self.predict_age:
+            # Repeat the same process after every 10 seconds if make prediction button not selected yet
+            self.cam_label.after(10, self._display_webcam) 
+        else:
+            print("THIS LOGIC WAS REACHED")
+
+    def _predict_age_selected(self):
+        self.predict_age = True
 
 
 if __name__ == "__main__":

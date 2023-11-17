@@ -1,5 +1,6 @@
 # System Imports
 import tkinter as tk
+import tkinter.font
 
 # External Imports
 import cv2
@@ -29,8 +30,12 @@ class AgePredictorGUI:
         self.window.iconphoto(False, self.window_logo)
 
         # Displaying button to take picture and execute code
-        self.make_age_prediction_button = tk.Button(self.window, text=BUTTON_TEXT, command=self._predict_age_selected)
-        self.make_age_prediction_button.pack()
+        self.make_age_prediction_button = tk.Button(self.window, text=BUTTON_TEXT, width=BUTTON_WIDTH, 
+                                                    height=BUTTON_HEIGHT, 
+                                                    font=tkinter.font.Font(family='Helvetica', size=BUTTON_TEXT_SIZE),
+                                                    bg=BUTTON_COLOR, fg="white",
+                                                    command=self._predict_age_selected)
+        self.make_age_prediction_button.pack(pady=PADDING_IN_BETWEEN_WIDGETS)
 
         # Commencing the GUI window loop
         self.window.mainloop()

@@ -2,11 +2,11 @@
 import tkinter as tk
 import tkinter.font
 
-# External Imports
+# Library Imports
 import cv2
 from PIL import Image, ImageTk 
 
-#Config Imports
+# Our Imports
 from configs import *
 
 

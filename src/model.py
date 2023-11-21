@@ -50,9 +50,6 @@ class AgePredictor(nn.Module):
         # Inputting the input_image and getting our age prediction
         return self.mobile_net_v2_age_predictor(input_image)
 
-
-if __name__ == '__main__':
-
-    age_predictor = AgePredictor()
-
-    summary(age_predictor, (3, 244, 244), device=DEVICE)
+    def train_age_predictor(self):
+        
+        pass

@@ -1,12 +1,14 @@
+# System imports
+import time
+
 # Library imports
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
-from torchsummary import summary
 
 # Our imports 
-from configs import MN_V2_OUT_SIZE, DEVICE, LEARNING_RATE
+from configs import *
 
 
 class AgePredictor(nn.Module):
@@ -81,29 +83,56 @@ class AgePredictor(nn.Module):
 
         age_loss = self.age_criterion(predicted_age.squeeze(), age)
 
-        return age_loss
+        age_mae = torch.abs(age-predicted_age).float().sum()
+
+        return age_loss, age_mae
 
     def train_age_predictor(self):
         
-        train_losses, val_losses = [], []
+        print("Began training age_predictor, num_epochs: %d" % (NUM_EPOCHS))
+
+        start_time = time.time()
+
+        self.train_losses, self.val_losses = [], []
+        self.val_age_maes = []
     
-        n_epochs = 10
+        n_epochs = NUM_EPOCHS
 
         for epoch in range(n_epochs):
 
             epoch_train_loss, epoch_val_loss = 0, 0
+            val_age_mae, ctr = 0, 0
 
             for _, data in enumerate(self.train_data_loader):
                 loss = self._train_batch(data)
                 epoch_train_loss += loss.item()
 
             for _, data in enumerate(self.val_data_loader):
-                loss = self._val_batch(data)
+                loss, age_mae = self._val_batch(data)
                 epoch_val_loss += loss.item()
+                val_age_mae += age_mae
+                ctr += len(data[0])
 
-        epoch_train_loss /= len(self.train_data_loader)
-        epoch_val_loss /= len(self.val_data_loader)
-        train_losses.append(epoch_train_loss)
-        val_losses.append(epoch_val_loss)
+            epoch_train_loss /= len(self.train_data_loader)
+            epoch_val_loss /= len(self.val_data_loader)
+            val_age_mae /= ctr
 
-        print("Epoch %d, train_loss: %.3f, val_loss: %.3f" % (epoch+1, epoch_train_loss, epoch_val_loss))
+            self.train_losses.append(epoch_train_loss)
+            self.val_losses.append(epoch_val_loss)
+            self.val_age_maes.append(val_age_mae)
+
+            time_elasped = time.time() - start_time
+
+            print('{}/{} ({:.2f}s - {:.2f}s remaining)'.format(epoch+1, n_epochs, time.time()-start_time, (n_epochs-epoch)*(time_elasped/(epoch+1))))
+            print("train_loss: %.3f, val_loss: %.3f, val_age_mae:%.3f" % (epoch_train_loss, epoch_val_loss, val_age_mae))
+
+    def save_training_results(self):
+
+        with open(LOSS_MAE_SUMMARY_PATH, "w") as output_file:
+
+            for idx in range(len(self.train_losses)):
+                output_file.write("%f, %f, %f", self.train_losses[idx], self.val_losses[idx], self.val_age_maes[idx])
+
+            output_file.close()
+
+        torch.save(self.mobile_net_v2_age_predictor, AGE_PRED_WEIGHTS_PATH)

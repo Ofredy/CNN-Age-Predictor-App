@@ -5,10 +5,7 @@ import os
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-import numpy as np
 import cv2
-import pandas as pd
-import glob
 
 # Our imports
 from configs import *
@@ -32,14 +29,14 @@ class AgeDataset(Dataset):
         file = os.path.join(PATH_TO_FOLDER, f.file)
         age = f.age
         img = cv2.imread(file)
-        img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2RGB)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         return img, age
 
     def preprocess_image(self, img):
 
         img = cv2.resize(img, (IMG_SIZE, IMG_SIZE))
-        img = torch.tensor(img)
+        img = torch.tensor(img).permute(2, 0, 1)
         img = self.normalize(img/255)
 
         return img[None]
@@ -54,7 +51,8 @@ class AgeDataset(Dataset):
 
             ages.append(float(int(age)/80)) 
 
-        ages = [ torch.tensor(x).to(DEVICE) for x in ages ]
+        ages = torch.tensor(ages).to(DEVICE).float()
+
         imgs = torch.cat(imgs).to(DEVICE)
 
         return imgs, ages

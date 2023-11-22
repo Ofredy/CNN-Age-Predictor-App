@@ -16,11 +16,17 @@ BUTTON_WIDTH, BUTTON_HEIGHT = 30, 5
 
 # CNN CONFIGS
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-LEARNING_RATE = 1e-4
 MN_V2_OUT_SIZE = 1280
+NUM_EPOCHS = 10
+LEARNING_RATE = 1e-4
+AGE_PRED_WEIGHTS_PATH = "age_predictor_weights.pt"
 
 # DATASET CONFIGS
+BATCH_SIZE = 32
 IMG_SIZE = 244
 PATH_TO_FOLDER = os.path.join("..", "data", "fairface-img-margin025-trainval")
-TRAIN_CSV = os.path.join(PATH_TO_FOLDER, "fairface_label_train.csv")
-VAL_CSV = os.path.join(PATH_TO_FOLDER, "fairface_label_val.csv")
+TRAIN_CSV = os.path.join(PATH_TO_FOLDER, "fairface-label-train.csv")
+VAL_CSV = os.path.join(PATH_TO_FOLDER, "fairface-label-val.csv")
+
+# AgePredictor training configs
+LOSS_MAE_SUMMARY_PATH = "loss_mae_summary.txt"

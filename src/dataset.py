@@ -1,7 +1,9 @@
+# System imports
+import os
+
 # Library imports
 import torch
-from torch.utils.data import Dataset, DataLoader
-import torchvision
+from torch.utils.data import Dataset
 from torchvision import transforms
 import numpy as np
 import cv2
@@ -21,16 +23,13 @@ class AgeDataset(Dataset):
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], 
                                               std=[0.229, 0.224, 0.225])
 
-        self.train_dataframe = pd.read_csv(TRAIN_CSV)
-        self.val_dataframe = pd.read_csv(VAL_CSV)
-
     def __len__(self):
         return len(self.data_frame)
 
     def __getitem__(self, index):
         
         f = self.data_frame.iloc[index].squeeze()
-        file = f.file
+        file = os.path.join(PATH_TO_FOLDER, f.file)
         age = f.age
         img = cv2.imread(file)
         img = cv2.cvtColor(img, cv2.COLOR_BAYER_BG2RGB)

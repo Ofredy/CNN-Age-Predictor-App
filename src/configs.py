@@ -18,3 +18,9 @@ BUTTON_WIDTH, BUTTON_HEIGHT = 30, 5
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 LEARNING_RATE = 1e-4
 MN_V2_OUT_SIZE = 1280
+
+# DATASET CONFIGS
+IMG_SIZE = 244
+PATH_TO_FOLDER = os.path.join("..", "data", "fairface-img-margin025-trainval")
+TRAIN_CSV = os.path.join(PATH_TO_FOLDER, "fairface_label_train.csv")
+VAL_CSV = os.path.join(PATH_TO_FOLDER, "fairface_label_val.csv")

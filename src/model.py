@@ -11,7 +11,7 @@ from configs import MN_V2_OUT_SIZE, DEVICE, LEARNING_RATE
 
 class AgePredictor(nn.Module):
 
-    def __init__(self):
+    def __init__(self, train_data_loader, val_data_loader):
         
         super().__init__()
 
@@ -19,6 +19,9 @@ class AgePredictor(nn.Module):
 
         self.age_criterion = nn.L1Loss()
         self.optimizer = optim.Adam(self.parameters(), lr=LEARNING_RATE)
+
+        self.train_data_loader = train_data_loader
+        self.val_data_loader = val_data_loader
 
     def _define_age_predictor_model(self):
 
@@ -50,6 +53,57 @@ class AgePredictor(nn.Module):
         # Inputting the input_image and getting our age prediction
         return self.mobile_net_v2_age_predictor(input_image)
 
+    def _train_batch(self, data):
+
+        self.mobile_net_v2_age_predictor.train()
+
+        img, age = data
+
+        self.optimizer.zero_grad()
+
+        predicted_age = self.mobile_net_v2_age_predictor(img)
+
+        age_loss = self.age_criterion(predicted_age.squeeze(), age)
+        age_loss.backward()
+
+        self.optimizer.step()
+
+        return age_loss
+
+    def _val_batch(self, data):
+        
+        self.mobile_net_v2_age_predictor.eval()
+
+        img, age = data
+
+        with torch.no_grad():
+            predicted_age = self.mobile_net_v2_age_predictor(img)
+
+        age_loss = self.age_criterion(predicted_age.squeeze(), age)
+
+        return age_loss
+
     def train_age_predictor(self):
         
-        pass
+        train_losses, val_losses = [], []
+    
+        n_epochs = 10
+
+        for epoch in range(n_epochs):
+
+            epoch_train_loss, epoch_val_loss = 0, 0
+
+            for _, data in enumerate(self.train_data_loader):
+                loss = self._train_batch(data)
+                epoch_train_loss += loss.item()
+
+            for _, data in enumerate(self.val_data_loader):
+                loss = self._val_batch(data)
+                epoch_val_loss += loss.item()
+
+        epoch_train_loss /= len(self.train_data_loader)
+        epoch_val_loss /= len(self.val_data_loader)
+        train_losses.append(epoch_train_loss)
+        val_losses.append(epoch_val_loss)
+
+        print("Epoch %d, train_loss: %.3f, val_loss: %.3f" % (epoch+1, epoch_train_loss, epoch_val_loss))

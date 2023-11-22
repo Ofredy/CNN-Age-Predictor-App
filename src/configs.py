@@ -19,7 +19,7 @@ DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 MN_V2_OUT_SIZE = 1280
 NUM_EPOCHS = 5
 LEARNING_RATE = 1e-4
-AGE_PRED_WEIGHTS_PATH = "age_predictor_weights.pt"
+AGE_PRED_WEIGHTS_PATH = os.path.join("training_summary", "age_predictor_weights.pt")
 
 # DATASET CONFIGS
 BATCH_SIZE = 32
@@ -29,4 +29,4 @@ TRAIN_CSV = os.path.join(PATH_TO_FOLDER, "fairface-label-train.csv")
 VAL_CSV = os.path.join(PATH_TO_FOLDER, "fairface-label-val.csv")
 
 # AgePredictor training configs
-LOSS_MAE_SUMMARY_PATH = "loss_mae_summary.txt"
+LOSS_MAE_SUMMARY_PATH = os.path.join("training_summary", "loss_mae_summary.txt")

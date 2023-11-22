@@ -13,7 +13,7 @@ from configs import *
 
 class AgePredictor(nn.Module):
 
-    def __init__(self, train_data_loader, val_data_loader):
+    def __init__(self):
         
         super().__init__()
 
@@ -21,9 +21,6 @@ class AgePredictor(nn.Module):
 
         self.age_criterion = nn.L1Loss()
         self.optimizer = optim.Adam(self.parameters(), lr=LEARNING_RATE)
-
-        self.train_data_loader = train_data_loader
-        self.val_data_loader = val_data_loader
 
     def _define_age_predictor_model(self):
 
@@ -87,7 +84,7 @@ class AgePredictor(nn.Module):
 
         return age_loss, age_mae
 
-    def train_age_predictor(self):
+    def train_age_predictor(self, train_data_loader, val_data_loader):
         
         print("Began training age_predictor, num_epochs: %d" % (NUM_EPOCHS))
 
@@ -103,18 +100,18 @@ class AgePredictor(nn.Module):
             epoch_train_loss, epoch_val_loss = 0, 0
             val_age_mae, ctr = 0, 0
 
-            for _, data in enumerate(self.train_data_loader):
+            for _, data in enumerate(train_data_loader):
                 loss = self._train_batch(data)
                 epoch_train_loss += loss.item()
 
-            for _, data in enumerate(self.val_data_loader):
+            for _, data in enumerate(val_data_loader):
                 loss, age_mae = self._val_batch(data)
                 epoch_val_loss += loss.item()
                 val_age_mae += age_mae
                 ctr += len(data[0])
 
-            epoch_train_loss /= len(self.train_data_loader)
-            epoch_val_loss /= len(self.val_data_loader)
+            epoch_train_loss /= len(train_data_loader)
+            epoch_val_loss /= len(val_data_loader)
             val_age_mae /= ctr
 
             self.train_losses.append(epoch_train_loss)
@@ -131,8 +128,16 @@ class AgePredictor(nn.Module):
         with open(LOSS_MAE_SUMMARY_PATH, "w") as output_file:
 
             for idx in range(len(self.train_losses)):
-                output_file.write("%f, %f, %f", self.train_losses[idx], self.val_losses[idx], self.val_age_maes[idx])
+                output_file.write("%f, %f, %f\n" % (self.train_losses[idx], self.val_losses[idx], self.val_age_maes[idx]))
 
             output_file.close()
 
-        torch.save(self.mobile_net_v2_age_predictor, AGE_PRED_WEIGHTS_PATH)
+        torch.save(self.mobile_net_v2_age_predictor.state_dict(), AGE_PRED_WEIGHTS_PATH)
+
+    def load_age_predictor_weights(self):
+
+        self.mobile_net_v2_age_predictor.load_state_dict(torch.load(AGE_PRED_WEIGHTS_PATH))
+
+    def predict_age(self, input_image):
+
+        pass

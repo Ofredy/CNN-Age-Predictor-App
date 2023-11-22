@@ -17,7 +17,7 @@ BUTTON_WIDTH, BUTTON_HEIGHT = 30, 5
 # CNN CONFIGS
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 MN_V2_OUT_SIZE = 1280
-NUM_EPOCHS = 10
+NUM_EPOCHS = 5
 LEARNING_RATE = 1e-4
 AGE_PRED_WEIGHTS_PATH = "age_predictor_weights.pt"
 

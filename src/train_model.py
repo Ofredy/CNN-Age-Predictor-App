@@ -17,8 +17,8 @@ val = AgeDataset(val_dataframe)
 train_data_loader = DataLoader(train, batch_size=BATCH_SIZE, shuffle=True, drop_last=True, collate_fn=train.collate_fn)
 val_data_loader = DataLoader(val, batch_size=BATCH_SIZE, shuffle=True, drop_last=True, collate_fn=val.collate_fn)
 
-age_predictor = AgePredictor(train_data_loader, val_data_loader)
+age_predictor = AgePredictor()
 
-age_predictor.train_age_predictor()
+age_predictor.train_age_predictor(train_data_loader, val_data_loader)
 
 age_predictor.save_training_results()

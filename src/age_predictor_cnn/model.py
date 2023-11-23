@@ -120,6 +120,10 @@ class AgePredictor(nn.Module):
 
             time_elasped = time.time() - start_time
 
+            epoch_age_pred_weight_path = os.path.join("training_summary", "{}age_predictor_weights.pt".format(epoch+1))
+
+            torch.save(self.mobile_net_v2_age_predictor.state_dict(), epoch_age_pred_weight_path)
+
             print('{}/{} ({:.2f}s - {:.2f}s remaining)'.format(epoch+1, n_epochs, time.time()-start_time, (n_epochs-epoch)*(time_elasped/(epoch+1))))
             print("train_loss: %.3f, val_loss: %.3f, val_age_mae:%.3f" % (epoch_train_loss, epoch_val_loss, val_age_mae))
 
@@ -131,8 +135,6 @@ class AgePredictor(nn.Module):
                 output_file.write("%f, %f, %f\n" % (self.train_losses[idx], self.val_losses[idx], self.val_age_maes[idx]))
 
             output_file.close()
-
-        torch.save(self.mobile_net_v2_age_predictor.state_dict(), AGE_PRED_WEIGHTS_PATH)
 
     def load_age_predictor_weights(self):
 

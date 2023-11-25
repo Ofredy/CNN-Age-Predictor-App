@@ -6,8 +6,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.models as models
+import cv2
 
 # Our imports 
+from dataset import AgeDataset
 from configs import *
 
 
@@ -21,6 +23,8 @@ class AgePredictor(nn.Module):
 
         self.age_criterion = nn.L1Loss()
         self.optimizer = optim.Adam(self.parameters(), lr=LEARNING_RATE)
+
+        self.prediction_dataset = AgeDataset(None)
 
     def _define_age_predictor_model(self):
 
@@ -140,6 +144,14 @@ class AgePredictor(nn.Module):
 
         self.mobile_net_v2_age_predictor.load_state_dict(torch.load(AGE_PRED_WEIGHTS_PATH))
 
-    def predict_age(self, input_image):
+    def predict_age(self, input_image_path):
 
-        pass
+        img = cv2.imread(input_image_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = self.prediction_dataset.preprocess_image(img).to(DEVICE)
+        
+        with torch.no_grad():
+            self.mobile_net_v2_age_predictor.eval()
+            predicted_age = self.mobile_net_v2_age_predictor(img)
+
+        return int(predicted_age * 80)

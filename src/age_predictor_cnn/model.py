@@ -36,10 +36,9 @@ class AgePredictor(nn.Module):
             param.requires_grad = False
 
         self.mobilenet_v3_age_predictor.avgpool = nn.Sequential(
-            nn.Conv2d(MOBILENET_V3_OUT_CHANNELS, MOBILENET_V3_OUT_CHANNELS//2, kernel_size=3),
-            nn.Dropout2d(0.45),
+            nn.Conv2d(MOBILENET_V3_OUT_CHANNELS, MOBILENET_V3_OUT_CHANNELS//4, kernel_size=3, padding=1),
             nn.MaxPool2d(2),
-            nn.ReLU(),            
+            nn.ReLU(),  
             nn.Flatten()
         )
 
@@ -47,11 +46,15 @@ class AgePredictor(nn.Module):
             nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE, MOBILENET_V3_AVG_POOL_OUT_SIZE//4),
             nn.ReLU(),
             nn.Dropout(0.4),
-            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//4, MOBILENET_V3_AVG_POOL_OUT_SIZE//16),
+            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//4, MOBILENET_V3_AVG_POOL_OUT_SIZE//8),
+            nn.ReLU(),
+            nn.Dropout(0.4),
+            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//8, MOBILENET_V3_AVG_POOL_OUT_SIZE//16),
             nn.ReLU(),
             nn.Dropout(0.4),
             nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//16, MOBILENET_V3_AVG_POOL_OUT_SIZE//32),
             nn.ReLU(),
+            nn.Dropout(0.4),
             nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//32, 1),
             nn.Sigmoid()
         )
@@ -165,8 +168,9 @@ class AgePredictor(nn.Module):
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.prediction_dataset.preprocess_image(img).to(DEVICE)
         
+        self.mobilenet_v3_age_predictor.eval()
+
         with torch.no_grad():
-            self.mobilenet_v3_age_predictor.eval()
             predicted_age = self.mobilenet_v3_age_predictor(img)
 
         return int(predicted_age * 80)

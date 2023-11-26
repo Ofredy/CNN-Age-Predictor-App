@@ -7,7 +7,7 @@ import cv2
 from PIL import Image, ImageTk 
 
 # Our Imports
-from configs import *
+from age_predictor_cnn.configs import *
 
 
 class AgePredictorGUI:

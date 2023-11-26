@@ -19,6 +19,6 @@ val_data_loader = DataLoader(val, batch_size=BATCH_SIZE, shuffle=True, drop_last
 
 age_predictor = AgePredictor()
 
-age_predictor.train_age_predictor(train_data_loader, val_data_loader)
+age_predictor.train_age_predictor(train_data_loader, val_data_loader, continue_training=False)
 
 age_predictor.save_training_results()

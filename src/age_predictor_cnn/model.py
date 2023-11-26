@@ -1,5 +1,6 @@
 # System imports
 import time
+import glob
 
 # Library imports
 import torch
@@ -28,43 +29,49 @@ class AgePredictor(nn.Module):
 
     def _define_age_predictor_model(self):
 
-        self.mobile_net_v2_age_predictor = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.DEFAULT)
+        self.mobilenet_v3_age_predictor = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT)
 
         # Freeze parameters so we don't backprop through them
-        for param in self.mobile_net_v2_age_predictor.parameters():
+        for param in self.mobilenet_v3_age_predictor.parameters():
             param.requires_grad = False
 
-        self.mobile_net_v2_age_predictor.classifier = nn.Sequential(
-            nn.Linear(self.mobile_net_v2_age_predictor.last_channel, MN_V2_OUT_SIZE//2),
+        self.mobilenet_v3_age_predictor.avgpool = nn.Sequential(
+            nn.Conv2d(MOBILENET_V3_OUT_CHANNELS, MOBILENET_V3_OUT_CHANNELS//2, kernel_size=3),
+            nn.Dropout2d(0.45),
+            nn.MaxPool2d(2),
+            nn.ReLU(),            
+            nn.Flatten()
+        )
+
+        self.mobilenet_v3_age_predictor.classifier = nn.Sequential(
+            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE, MOBILENET_V3_AVG_POOL_OUT_SIZE//4),
             nn.ReLU(),
             nn.Dropout(0.4),
-            nn.Linear(MN_V2_OUT_SIZE//2, MN_V2_OUT_SIZE//4),
+            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//4, MOBILENET_V3_AVG_POOL_OUT_SIZE//16),
             nn.ReLU(),
             nn.Dropout(0.4),
-            nn.Linear(MN_V2_OUT_SIZE//4,MN_V2_OUT_SIZE//8),
+            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//16, MOBILENET_V3_AVG_POOL_OUT_SIZE//32),
             nn.ReLU(),
-            nn.Linear(MN_V2_OUT_SIZE//8, MN_V2_OUT_SIZE//16),
-            nn.ReLU(),
-            nn.Linear(MN_V2_OUT_SIZE//16, 1),
+            nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE//32, 1),
             nn.Sigmoid()
         )
 
-        self.mobile_net_v2_age_predictor.to(DEVICE)
+        self.mobilenet_v3_age_predictor.to(DEVICE)
 
     def forward(self, input_image):
 
         # Inputting the input_image and getting our age prediction
-        return self.mobile_net_v2_age_predictor(input_image)
+        return self.mobilenet_v3_age_predictor(input_image)
 
     def _train_batch(self, data):
 
-        self.mobile_net_v2_age_predictor.train()
+        self.mobilenet_v3_age_predictor.train()
 
         img, age = data
 
         self.optimizer.zero_grad()
 
-        predicted_age = self.mobile_net_v2_age_predictor(img)
+        predicted_age = self.mobilenet_v3_age_predictor(img)
 
         age_loss = self.age_criterion(predicted_age.squeeze(), age)
         age_loss.backward()
@@ -75,12 +82,12 @@ class AgePredictor(nn.Module):
 
     def _val_batch(self, data):
         
-        self.mobile_net_v2_age_predictor.eval()
+        self.mobilenet_v3_age_predictor.eval()
 
         img, age = data
 
         with torch.no_grad():
-            predicted_age = self.mobile_net_v2_age_predictor(img)
+            predicted_age = self.mobilenet_v3_age_predictor(img)
 
         age_loss = self.age_criterion(predicted_age.squeeze(), age)
 
@@ -88,9 +95,14 @@ class AgePredictor(nn.Module):
 
         return age_loss, age_mae
 
-    def train_age_predictor(self, train_data_loader, val_data_loader):
+    def train_age_predictor(self, train_data_loader, val_data_loader, continue_training=False):
         
-        print("Began training age_predictor, num_epochs: %d" % (NUM_EPOCHS))
+        starting_epoch = 0
+
+        if continue_training:
+            starting_epoch = self.load_age_predictor_weights()
+        
+        print("Began training age_predictor, starting_epoch: %d, will train until num_epochs: %d" % (starting_epoch, starting_epoch+NUM_EPOCHS))
 
         start_time = time.time()
 
@@ -99,7 +111,7 @@ class AgePredictor(nn.Module):
     
         n_epochs = NUM_EPOCHS
 
-        for epoch in range(n_epochs):
+        for epoch in range(starting_epoch, starting_epoch+n_epochs):
 
             epoch_train_loss, epoch_val_loss = 0, 0
             val_age_mae, ctr = 0, 0
@@ -126,9 +138,9 @@ class AgePredictor(nn.Module):
 
             epoch_age_pred_weight_path = os.path.join("training_summary", "{}age_predictor_weights.pt".format(epoch+1))
 
-            torch.save(self.mobile_net_v2_age_predictor.state_dict(), epoch_age_pred_weight_path)
+            torch.save(self.mobilenet_v3_age_predictor.state_dict(), epoch_age_pred_weight_path)
 
-            print('{}/{} ({:.2f}s - {:.2f}s remaining)'.format(epoch+1, n_epochs, time.time()-start_time, (n_epochs-epoch)*(time_elasped/(epoch+1))))
+            print('{}/{} ({:.2f}s - {:.2f}s remaining)'.format(epoch+1, starting_epoch+n_epochs, time.time()-start_time, (starting_epoch-epoch)*(time_elasped/(epoch+1))))
             print("train_loss: %.3f, val_loss: %.3f, val_age_mae:%.3f" % (epoch_train_loss, epoch_val_loss, val_age_mae))
 
     def save_training_results(self):
@@ -142,7 +154,10 @@ class AgePredictor(nn.Module):
 
     def load_age_predictor_weights(self):
 
-        self.mobile_net_v2_age_predictor.load_state_dict(torch.load(AGE_PRED_WEIGHTS_PATH))
+        path = glob.glob(AGE_PRED_WEIGHTS_PATH + "/*.pt")
+        self.mobilenet_v3_age_predictor.load_state_dict(torch.load(path[-1]))
+        
+        return int(path[-1].split('a')[2][-1])
 
     def predict_age(self, input_image_path):
 
@@ -151,7 +166,7 @@ class AgePredictor(nn.Module):
         img = self.prediction_dataset.preprocess_image(img).to(DEVICE)
         
         with torch.no_grad():
-            self.mobile_net_v2_age_predictor.eval()
-            predicted_age = self.mobile_net_v2_age_predictor(img)
+            self.mobilenet_v3_age_predictor.eval()
+            predicted_age = self.mobilenet_v3_age_predictor(img)
 
         return int(predicted_age * 80)

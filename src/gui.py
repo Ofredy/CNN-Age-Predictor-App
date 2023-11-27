@@ -9,6 +9,7 @@ import PIL
 from PIL import Image, ImageTk 
 
 # Our Imports
+from age_predictor_cnn.model import AgePredictor
 from age_predictor_cnn.configs import *
 
 
@@ -31,6 +32,9 @@ class AgePredictorGUI:
         self.window_logo = tk.PhotoImage(file=LOGO_IMG_PATH)
         self.window.iconphoto(False, self.window_logo)
 
+        # Displaying picture taking instructions
+
+
         # Displaying button to take picture and execute code
         self.make_age_prediction_button = tk.Button(self.window, text=BUTTON_TEXT, width=BUTTON_WIDTH, 
                                                     height=BUTTON_HEIGHT, 
@@ -38,6 +42,13 @@ class AgePredictorGUI:
                                                     bg=BUTTON_COLOR, fg="white",
                                                     command=self._predict_age_selected)
         self.make_age_prediction_button.pack(pady=PADDING_IN_BETWEEN_WIDGETS)
+
+        self.age_predictor = AgePredictor(deployment=True)
+        self.ages_predicted = 1
+
+        # Displaying predicted age 
+
+        # Reset button once, age is predicted
 
         # Commencing the GUI window loop
         self.window.mainloop()
@@ -60,13 +71,13 @@ class AgePredictorGUI:
 
         rows, cols = self.captured_img.size
 
-        midpoint_x = rows // 2
-        midpoint_y = cols // 2 
+        self.midpoint_x = rows // 2
+        self.midpoint_y = cols // 2 
 
-        top_left_corner = (midpoint_x-BOUNDARY_BOX_DX_DY, midpoint_y-BOUNDARY_BOX_DX_DY)
-        bottom_left_corner = (midpoint_x-BOUNDARY_BOX_DX_DY, midpoint_y+BOUNDARY_BOX_DX_DY)
-        top_right_corner = (midpoint_x+BOUNDARY_BOX_DX_DY, midpoint_y-BOUNDARY_BOX_DX_DY)
-        bottom_right_corner = (midpoint_x+BOUNDARY_BOX_DX_DY, midpoint_y+BOUNDARY_BOX_DX_DY)
+        top_left_corner = (self.midpoint_x-BOUNDARY_BOX_DX_DY, self.midpoint_y-BOUNDARY_BOX_DX_DY)
+        bottom_left_corner = (self.midpoint_x-BOUNDARY_BOX_DX_DY, self.midpoint_y+BOUNDARY_BOX_DX_DY)
+        top_right_corner = (self.midpoint_x+BOUNDARY_BOX_DX_DY, self.midpoint_y-BOUNDARY_BOX_DX_DY)
+        bottom_right_corner = (self.midpoint_x+BOUNDARY_BOX_DX_DY, self.midpoint_y+BOUNDARY_BOX_DX_DY)
 
         self.captured_img = np.array(self.captured_img)
 
@@ -104,6 +115,14 @@ class AgePredictorGUI:
             # Convert Imagetk to Image then to cv2 image
             photo_image = ImageTk.getimage(photo_image)
             opencv_img = cv2.cvtColor(np.array(photo_image), cv2.COLOR_RGB2BGR)
+            opencv_img = opencv_img[self.midpoint_y-BOUNDARY_BOX_DX_DY:self.midpoint_y+BOUNDARY_BOX_DX_DY,
+                                    self.midpoint_x-BOUNDARY_BOX_DX_DY:self.midpoint_x+BOUNDARY_BOX_DX_DY]
+
+            output_img_path = os.path.join("predicted_images", str(self.ages_predicted) + ".jpg")
+            cv2.imwrite(output_img_path, opencv_img)
+
+            print(self.age_predictor.predict_age(output_img_path))
+
             print("THIS LOGIC WAS REACHED")
 
     def _predict_age_selected(self):

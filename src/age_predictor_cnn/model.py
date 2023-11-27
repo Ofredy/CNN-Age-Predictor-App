@@ -10,13 +10,13 @@ import torchvision.models as models
 import cv2
 
 # Our imports 
-from dataset import AgeDataset
-from configs import *
+from age_predictor_cnn.dataset import AgeDataset
+from age_predictor_cnn.configs import *
 
 
 class AgePredictor(nn.Module):
 
-    def __init__(self):
+    def __init__(self, deployment=False):
         
         super().__init__()
 
@@ -24,6 +24,10 @@ class AgePredictor(nn.Module):
 
         self.age_criterion = nn.L1Loss()
         self.optimizer = optim.Adam(self.parameters(), lr=LEARNING_RATE)
+
+        self.deployment = deployment
+        if self.deployment:
+            self.load_age_predictor_weights()
 
         self.prediction_dataset = AgeDataset(None)
 
@@ -157,10 +161,18 @@ class AgePredictor(nn.Module):
 
     def load_age_predictor_weights(self):
 
-        path = glob.glob(AGE_PRED_WEIGHTS_PATH + "/*.pt")
+        if self.deployment:
+            age_predictor_deployment_path = os.path.join("age_predictor_cnn", AGE_PRED_WEIGHTS_PATH, "*.pt")
+            path = glob.glob(age_predictor_deployment_path)
+            epoch = int(path[-1].split('a')[3][-1])
+        else:
+            age_predictor_training_path = os.path.join(AGE_PRED_WEIGHTS_PATH, "*.pt")
+            path = glob.glob(age_predictor_training_path)
+            epoch = int(path[-1].split('a')[2][-1])
+
         self.mobilenet_v3_age_predictor.load_state_dict(torch.load(path[-1]))
         
-        return int(path[-1].split('a')[2][-1])
+        return epoch
 
     def predict_age(self, input_image_path):
 

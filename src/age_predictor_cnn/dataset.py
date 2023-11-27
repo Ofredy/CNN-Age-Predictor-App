@@ -8,7 +8,7 @@ from torchvision import transforms
 import cv2
 
 # Our imports
-from configs import *
+from age_predictor_cnn.configs import *
 
 
 class AgeDataset(Dataset):

@@ -154,6 +154,8 @@ class AgePredictor(nn.Module):
 
         with open(LOSS_MAE_SUMMARY_PATH, "a") as output_file:
 
+            output_file.write("train_loss, val_loss, val_age_mae")
+
             for idx in range(len(self.train_losses)):
                 output_file.write("%f, %f, %f\n" % (self.train_losses[idx], self.val_losses[idx], self.val_age_maes[idx]))
 

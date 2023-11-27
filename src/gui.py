@@ -33,7 +33,11 @@ class AgePredictorGUI:
         self.window.iconphoto(False, self.window_logo)
 
         # Displaying picture taking instructions
-
+        self.instruction_label = tk.Label(self.window,
+                                           text=INSTRUCTION_TEXT,
+                                           fg=TEXT_COLOR,
+                                           font=tkinter.font.Font(family='Helvetica', size=BUTTON_TEXT_SIZE))
+        self.instruction_label.pack(pady=PADDING_IN_BETWEEN_WIDGETS)
 
         # Displaying button to take picture and execute code
         self.make_age_prediction_button = tk.Button(self.window, text=BUTTON_TEXT, width=BUTTON_WIDTH, 
@@ -43,12 +47,18 @@ class AgePredictorGUI:
                                                     command=self._predict_age_selected)
         self.make_age_prediction_button.pack(pady=PADDING_IN_BETWEEN_WIDGETS)
 
+        # Initializing the AgePredictor network
         self.age_predictor = AgePredictor(deployment=True)
-        self.ages_predicted = 1
+        self.num_ages_predicted = 0
+        self.ages_predicted = []
 
         # Displaying predicted age 
-
-        # Reset button once, age is predicted
+        self.predict_age_label_text = PREDICT_AGE_LABEL_TEXT
+        self.predict_age_label = tk.Label(self.window,
+                                           text=self.predict_age_label_text,
+                                           fg=TEXT_COLOR,
+                                           font=tkinter.font.Font(family='Helvetica', size=BUTTON_TEXT_SIZE))
+        self.predict_age_label.pack(pady=PADDING_IN_BETWEEN_WIDGETS)
 
         # Commencing the GUI window loop
         self.window.mainloop()
@@ -118,12 +128,42 @@ class AgePredictorGUI:
             opencv_img = opencv_img[self.midpoint_y-BOUNDARY_BOX_DX_DY:self.midpoint_y+BOUNDARY_BOX_DX_DY,
                                     self.midpoint_x-BOUNDARY_BOX_DX_DY:self.midpoint_x+BOUNDARY_BOX_DX_DY]
 
-            output_img_path = os.path.join("predicted_images", str(self.ages_predicted) + ".jpg")
+            self.num_ages_predicted += 1
+        
+            output_img_path = os.path.join("predicted_images", str(self.num_ages_predicted) + ".jpg")
             cv2.imwrite(output_img_path, opencv_img)
 
-            print(self.age_predictor.predict_age(output_img_path))
+            self.ages_predicted.append(self.age_predictor.predict_age(output_img_path))
 
-            print("THIS LOGIC WAS REACHED")
+            self.predict_age_label_text = self.predict_age_label_text + str(self.ages_predicted[-1]) 
+            self.predict_age_label.config(text=self.predict_age_label_text)
+
+            self._display_reset_button()
 
     def _predict_age_selected(self):
+
         self.predict_age = True
+
+    def _display_reset_button(self):
+
+        self.reset_button = tk.Button(self.window, text=RESET_BUTTON_TEXT, width=RESET_BUTTON_WIDTH, 
+                                                    height=RESET_BUTTON_HEIGHT, 
+                                                    font=tkinter.font.Font(family='Helvetica', size=BUTTON_TEXT_SIZE),
+                                                    bg=BUTTON_COLOR, fg="white",
+                                                    command=self._reset_age_predictor)
+        self.reset_button.pack(pady=PADDING_IN_BETWEEN_WIDGETS)    
+
+    def _reset_age_predictor(self):
+
+        # Set predict_age bool to false
+        self.predict_age = False
+
+        # Reset predict_age_label_text
+        self.predict_age_label_text = PREDICT_AGE_LABEL_TEXT 
+        self.predict_age_label.config(text=self.predict_age_label_text)
+
+        # Remove reset button
+        self.reset_button.pack_forget()
+
+        # Begin displaying webcam again
+        self._display_webcam()

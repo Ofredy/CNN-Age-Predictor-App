@@ -1,0 +1,6 @@
+Image: 1, age_predicted: 28
+Image: 2, age_predicted: 27
+Image: 3, age_predicted: 31
+Image: 4, age_predicted: 28
+Image: 5, age_predicted: 31
+Image: 6, age_predicted: 31

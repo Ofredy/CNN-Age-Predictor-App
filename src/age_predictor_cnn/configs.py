@@ -21,6 +21,7 @@ BUTTON_WIDTH, BUTTON_HEIGHT = 30, 5
 PREDICT_AGE_LABEL_TEXT = "Predicted Age: "
 RESET_BUTTON_WIDTH, RESET_BUTTON_HEIGHT = 20, 2
 RESET_BUTTON_TEXT = "Make New Prediction"
+OUTPUT_PREDICTIONS_TXT_PATH = os.path.join("predicted_images", "predicted_ages_summary.txt")
 
 # CNN CONFIGS
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'

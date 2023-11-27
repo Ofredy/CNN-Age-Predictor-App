@@ -60,6 +60,9 @@ class AgePredictorGUI:
                                            font=tkinter.font.Font(family='Helvetica', size=BUTTON_TEXT_SIZE))
         self.predict_age_label.pack(pady=PADDING_IN_BETWEEN_WIDGETS)
 
+        # Adding window termination protocol
+        self.window.protocol('WM_DELETE_WINDOW', self._age_predictor_termination)
+
         # Commencing the GUI window loop
         self.window.mainloop()
 
@@ -69,9 +72,6 @@ class AgePredictorGUI:
         self.video_capture = cv2.VideoCapture(0)
         self.video_capture.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_WIDTH)
         self.video_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_HEIGHT)
-
-        # Adding hitting esc as an option to exit the application
-        self.window.bind('<Escape>', lambda e: self.window.quit())
 
         # Adding the cam to the window
         self.cam_label = tk.Label(self.window)
@@ -167,3 +167,17 @@ class AgePredictorGUI:
 
         # Begin displaying webcam again
         self._display_webcam()
+
+    def _age_predictor_termination(self):
+
+        if self.num_ages_predicted != 0:
+
+            with open(OUTPUT_PREDICTIONS_TXT_PATH, "w") as output_file:
+
+                for idx, age_predicted in enumerate(self.ages_predicted):
+
+                    output_file.write("Image: %d, age_predicted: %d\n" % (idx+1, age_predicted))
+
+                output_file.close()
+
+        self.window.destroy()

@@ -4,6 +4,8 @@ import tkinter.font
 
 # Library Imports
 import cv2
+import numpy as np
+import PIL
 from PIL import Image, ImageTk 
 
 # Our Imports
@@ -54,6 +56,25 @@ class AgePredictorGUI:
         self.cam_label = tk.Label(self.window)
         self.cam_label.pack()
 
+    def _add_boundary_box(self):
+
+        rows, cols = self.captured_img.size
+
+        midpoint_x = rows // 2
+        midpoint_y = cols // 2 
+
+        top_left_corner = (midpoint_x-BOUNDARY_BOX_DX_DY, midpoint_y-BOUNDARY_BOX_DX_DY)
+        bottom_left_corner = (midpoint_x-BOUNDARY_BOX_DX_DY, midpoint_y+BOUNDARY_BOX_DX_DY)
+        top_right_corner = (midpoint_x+BOUNDARY_BOX_DX_DY, midpoint_y-BOUNDARY_BOX_DX_DY)
+        bottom_right_corner = (midpoint_x+BOUNDARY_BOX_DX_DY, midpoint_y+BOUNDARY_BOX_DX_DY)
+
+        self.captured_img = np.array(self.captured_img)
+
+        self.captured_img = cv2.line(self.captured_img, top_left_corner, top_right_corner, BOUNDARY_BOX_COLOR, BOUNDARY_BOX_THICKNESS)
+        self.captured_img = cv2.line(self.captured_img, top_left_corner, bottom_left_corner, BOUNDARY_BOX_COLOR, BOUNDARY_BOX_THICKNESS)
+        self.captured_img = cv2.line(self.captured_img, top_right_corner, bottom_right_corner, BOUNDARY_BOX_COLOR, BOUNDARY_BOX_THICKNESS)
+        self.captured_img = cv2.line(self.captured_img, bottom_left_corner, bottom_right_corner, BOUNDARY_BOX_COLOR, BOUNDARY_BOX_THICKNESS)
+
     def _display_webcam(self):
 
         # Capture the video frame by frame 
@@ -63,10 +84,12 @@ class AgePredictorGUI:
         opencv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA) 
     
         # Capture the latest frame and transform to image 
-        captured_image = Image.fromarray(opencv_image) 
-    
+        self.captured_img = Image.fromarray(opencv_image) 
+
+        self._add_boundary_box()
+
         # Convert captured image to photoimage 
-        photo_image = ImageTk.PhotoImage(image=captured_image) 
+        photo_image = ImageTk.PhotoImage(image=PIL.Image.fromarray(self.captured_img)) 
     
         # Displaying photoimage in the label 
         self.cam_label.photo_image = photo_image 
@@ -78,6 +101,9 @@ class AgePredictorGUI:
             # Repeat the same process after every 10 seconds if make prediction button not selected yet
             self.cam_label.after(10, self._display_webcam) 
         else:
+            # Convert Imagetk to Image then to cv2 image
+            photo_image = ImageTk.getimage(photo_image)
+            opencv_img = cv2.cvtColor(np.array(photo_image), cv2.COLOR_RGB2BGR)
             print("THIS LOGIC WAS REACHED")
 
     def _predict_age_selected(self):

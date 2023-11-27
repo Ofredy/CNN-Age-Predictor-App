@@ -127,8 +127,3 @@ class AgePredictorGUI:
 
     def _predict_age_selected(self):
         self.predict_age = True
-
-
-if __name__ == "__main__":
-    
-    age_predictor_gui = AgePredictorGUI()

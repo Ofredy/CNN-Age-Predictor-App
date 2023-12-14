@@ -31,9 +31,11 @@ NUM_EPOCHS = 5
 LEARNING_RATE = 1e-4
 LAST_LAYER_TO_FREEZE = 171
 AGE_PRED_WEIGHTS_PATH = os.path.join("training_summary")
+AGE_PRED_ONNX_PATH = os.path.join("training_summary", "age_predictor.onnx")
 
 # DATASET CONFIGS
 BATCH_SIZE = 32
+INPUT_CHANNELS = 3
 IMG_SIZE = 244
 PATH_TO_FOLDER = os.path.join("..", "..", "data", "fairface-img-margin025-trainval")
 TRAIN_CSV = os.path.join(PATH_TO_FOLDER, "fairface-label-train.csv")

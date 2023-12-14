@@ -22,3 +22,5 @@ age_predictor = AgePredictor()
 age_predictor.train_age_predictor(train_data_loader, val_data_loader, continue_training=False)
 
 age_predictor.save_training_results()
+
+age_predictor.save_model_onnx()

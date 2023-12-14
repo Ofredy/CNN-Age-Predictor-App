@@ -10,8 +10,8 @@ import torchvision.models as models
 import cv2
 
 # Our imports 
-from age_predictor_cnn.dataset import AgeDataset
-from age_predictor_cnn.configs import *
+from dataset import AgeDataset
+from configs import *
 
 
 class AgePredictor(nn.Module):
@@ -160,6 +160,13 @@ class AgePredictor(nn.Module):
                 output_file.write("%f, %f, %f\n" % (self.train_losses[idx], self.val_losses[idx], self.val_age_maes[idx]))
 
             output_file.close()
+
+    def save_model_onnx(self):
+
+        torch_input = torch.randn(1, INPUT_CHANNELS, IMG_SIZE, IMG_SIZE).to('cpu')
+        torch.onnx.export(self.mobilenet_v3_age_predictor.to('cpu'), 
+                          torch_input,
+                          f=AGE_PRED_ONNX_PATH)
 
     def load_age_predictor_weights(self):
 

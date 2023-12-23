@@ -1,3 +1,6 @@
+# System imports
+import os
+
 # Library imports
 import torch
 from torchvision import transforms
@@ -15,8 +18,8 @@ class AgePredictorGUI():
 
     def __init__(self):
 
-        self.face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-        self.onnx_path = 'age_predictor.onnx'
+        self.face_cascade = cv2.CascadeClassifier(os.path.join('weights', 'haarcascade_frontalface_default.xml'))
+        self.onnx_path = os.path.join('weights','age_predictor.onnx')
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], 
                                               std=[0.229, 0.224, 0.225])
 
@@ -89,9 +92,3 @@ class AgePredictorGUI():
 
             # Display age_prediction
             self._display_predicted_age()
-
-
-if __name__ == "__main__":
-
-    age_predictor_gui = AgePredictorGUI()
-    age_predictor_gui.window()

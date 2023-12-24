@@ -166,7 +166,7 @@ class AgePredictor(nn.Module):
         torch_input = torch.randn(1, INPUT_CHANNELS, IMG_SIZE, IMG_SIZE).to('cpu')
         torch.onnx.export(self.mobilenet_v3_age_predictor.to('cpu'), 
                           torch_input,
-                          f=AGE_PRED_ONNX_PATH)
+                          f=TRAIN_AGE_PRED_ONNX_PATH)
 
     def load_age_predictor_weights(self):
 

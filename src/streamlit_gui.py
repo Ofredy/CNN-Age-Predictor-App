@@ -1,6 +1,3 @@
-# System imports
-import os
-
 # Library imports
 import torch
 from torchvision import transforms
@@ -11,15 +8,15 @@ import onnx
 import onnxruntime
 
 # Our imports
-from age_predictor_cnn.configs import IMG_SIZE
+from age_predictor_cnn.configs import FACE_DECTECTION_PATH, ONNX_PATH, IMG_SIZE
 
 
 class AgePredictorGUI():
 
     def __init__(self):
 
-        self.face_cascade = cv2.CascadeClassifier(os.path.join('weights', 'haarcascade_frontalface_default.xml'))
-        self.onnx_path = os.path.join('weights','age_predictor.onnx')
+        self.face_cascade = cv2.CascadeClassifier(FACE_DECTECTION_PATH)
+        self.onnx_path = ONNX_PATH
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], 
                                               std=[0.229, 0.224, 0.225])
 

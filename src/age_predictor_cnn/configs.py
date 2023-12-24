@@ -6,6 +6,8 @@ import torch
 
 # GUI Configs
 LOGO_IMG_PATH = os.path.join("misc", "cougar_ai_logo.png")
+FACE_DECTECTION_PATH = os.path.join('weights', 'haarcascade_frontalface_default.xml')
+ONNX_PATH = os.path.join('weights','age_predictor.onnx')
 
 # CNN CONFIGS
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -15,7 +17,7 @@ NUM_EPOCHS = 5
 LEARNING_RATE = 1e-4
 LAST_LAYER_TO_FREEZE = 171
 AGE_PRED_WEIGHTS_PATH = os.path.join("training_summary")
-AGE_PRED_ONNX_PATH = os.path.join("training_summary", "age_predictor.onnx")
+TRAIN_AGE_PRED_ONNX_PATH = os.path.join("training_summary", "age_predictor.onnx")
 
 # DATASET CONFIGS
 BATCH_SIZE = 32

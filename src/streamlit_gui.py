@@ -6,6 +6,7 @@ import numpy as np
 import streamlit as st
 import onnx
 import onnxruntime
+from PIL import Image
 
 # Our imports
 from age_predictor_cnn.configs import FACE_DECTECTION_PATH, ONNX_PATH, IMG_SIZE
@@ -69,23 +70,31 @@ class AgePredictorGUI():
     def _display_predicted_age(self):
         
         if self.age_prediction == None:
-            st.text("Face not detected")
+            st.write("Face not detected")
         else:
-            st.text("Age Predicted: %d" % (self.age_prediction))
+            st.write("Age Predicted: %d" % (self.age_prediction))
 
 
     def window(self):
 
-        # Webcam display
-        self.img_file_buffer = st.camera_input("Take A Picture to Make An Age Prediction")
+        st.set_page_config(page_title="Cougar AI Age Predictor")
 
-        if self.img_file_buffer is not None:
+        with st.container():
+            
+            st.title('Cougar AI Age Predictor')
 
-            # Extract the face from the image
-            self._extract_face()
+        with st.container():
 
-            # Use extracted face to predict age
-            self._make_age_prediction()
+            # Webcam display
+            self.img_file_buffer = st.camera_input("Take A Picture to Make An Age Prediction")
 
-            # Display age_prediction
-            self._display_predicted_age()
+            if self.img_file_buffer is not None:
+
+                # Extract the face from the image
+                self._extract_face()
+
+                # Use extracted face to predict age
+                self._make_age_prediction()
+
+                # Display age_prediction
+                self._display_predicted_age()

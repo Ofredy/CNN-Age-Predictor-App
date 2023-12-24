@@ -5,7 +5,6 @@ import os
 import torch
 
 # GUI Configs
-LOGO_IMG_PATH = os.path.join("misc", "cougar_ai_logo.png")
 FACE_DECTECTION_PATH = os.path.join('weights', 'haarcascade_frontalface_default.xml')
 ONNX_PATH = os.path.join('weights','age_predictor.onnx')
 

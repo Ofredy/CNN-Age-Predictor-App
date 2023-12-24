@@ -6,7 +6,6 @@ import numpy as np
 import streamlit as st
 import onnx
 import onnxruntime
-from PIL import Image
 
 # Our imports
 from age_predictor_cnn.configs import FACE_DECTECTION_PATH, ONNX_PATH, IMG_SIZE
@@ -16,6 +15,7 @@ class AgePredictorGUI():
 
     def __init__(self):
 
+        # Face dection algorithm from cv2
         self.face_cascade = cv2.CascadeClassifier(FACE_DECTECTION_PATH)
         self.onnx_path = ONNX_PATH
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], 
@@ -53,7 +53,7 @@ class AgePredictorGUI():
 
         self._preprocess_img()   
 
-        # Loading in the model
+        # Loading in the model in onnx and running the age_predictor with the taken img
         age_predictor_onnx = onnx.load(self.onnx_path)
         onnx.checker.check_model(age_predictor_onnx)
 

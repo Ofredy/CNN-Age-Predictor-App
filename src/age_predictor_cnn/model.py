@@ -22,6 +22,7 @@ class AgePredictor(nn.Module):
 
         self._define_age_predictor_model()
 
+        # Defining our Loss function and the optimizer
         self.age_criterion = nn.L1Loss()
         self.optimizer = optim.Adam(self.parameters(), lr=LEARNING_RATE)
 
@@ -33,12 +34,14 @@ class AgePredictor(nn.Module):
 
     def _define_age_predictor_model(self):
 
+        # Loading in the mobilenet_v3 model
         self.mobilenet_v3_age_predictor = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT)
 
         # Freeze parameters so we don't backprop through them
         for param in self.mobilenet_v3_age_predictor.parameters():
             param.requires_grad = False
 
+        # Modifying the avgpoll of the mobilenet_v3
         self.mobilenet_v3_age_predictor.avgpool = nn.Sequential(
             nn.Conv2d(MOBILENET_V3_OUT_CHANNELS, MOBILENET_V3_OUT_CHANNELS//4, kernel_size=3, padding=1),
             nn.MaxPool2d(2),
@@ -46,6 +49,7 @@ class AgePredictor(nn.Module):
             nn.Flatten()
         )
 
+        # Modifying the classifier to instead predict age
         self.mobilenet_v3_age_predictor.classifier = nn.Sequential(
             nn.Linear(MOBILENET_V3_AVG_POOL_OUT_SIZE, MOBILENET_V3_AVG_POOL_OUT_SIZE//4),
             nn.ReLU(),
@@ -78,11 +82,12 @@ class AgePredictor(nn.Module):
 
         self.optimizer.zero_grad()
 
+        # Forward prop of the model
         predicted_age = self.mobilenet_v3_age_predictor(img)
 
+        # Backward prop of the model
         age_loss = self.age_criterion(predicted_age.squeeze(), age)
         age_loss.backward()
-
         self.optimizer.step()
 
         return age_loss
@@ -98,6 +103,7 @@ class AgePredictor(nn.Module):
 
         age_loss = self.age_criterion(predicted_age.squeeze(), age)
 
+        # No forward, this function is used to make sure we are not overfitting our training data
         age_mae = torch.abs(age-predicted_age).float().sum()
 
         return age_loss, age_mae
@@ -123,16 +129,19 @@ class AgePredictor(nn.Module):
             epoch_train_loss, epoch_val_loss = 0, 0
             val_age_mae, ctr = 0, 0
 
+            # Training batch
             for _, data in enumerate(train_data_loader):
                 loss = self._train_batch(data)
                 epoch_train_loss += loss.item()
 
+            # Validation batch
             for _, data in enumerate(val_data_loader):
                 loss, age_mae = self._val_batch(data)
                 epoch_val_loss += loss.item()
                 val_age_mae += age_mae
                 ctr += len(data[0])
 
+            # Avergaging the epoch results
             epoch_train_loss /= len(train_data_loader)
             epoch_val_loss /= len(val_data_loader)
             val_age_mae /= ctr
@@ -145,6 +154,7 @@ class AgePredictor(nn.Module):
 
             epoch_age_pred_weight_path = os.path.join("training_summary", "{}age_predictor_weights.pt".format(epoch+1))
 
+            # Saving the weights of the network
             torch.save(self.mobilenet_v3_age_predictor.state_dict(), epoch_age_pred_weight_path)
 
             print('{}/{} ({:.2f}s - {:.2f}s remaining)'.format(epoch+1, starting_epoch+n_epochs, time.time()-start_time, (starting_epoch-epoch)*(time_elasped/(epoch+1))))
@@ -185,6 +195,7 @@ class AgePredictor(nn.Module):
 
     def predict_age(self, input_image_path):
 
+        # NOTE: not used on the streamlit app, only for testing
         img = cv2.imread(input_image_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         img = self.prediction_dataset.preprocess_image(img).to(DEVICE)

@@ -17,6 +17,7 @@ class AgeDataset(Dataset):
         
         self.data_frame = data_frame
 
+        # Normalizing transform for images
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], 
                                               std=[0.229, 0.224, 0.225])
 
@@ -25,6 +26,7 @@ class AgeDataset(Dataset):
 
     def __getitem__(self, index):
         
+        # Parsing csv file for information
         f = self.data_frame.iloc[index].squeeze()
         file = os.path.join(PATH_TO_FOLDER, f.file)
         age = f.age

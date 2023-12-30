@@ -1,3 +1,6 @@
+# System imports
+import os
+
 # Library imports
 import torch
 from torchvision import transforms
@@ -20,6 +23,7 @@ class AgePredictorGUI():
         self.onnx_path = ONNX_PATH
         self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], 
                                               std=[0.229, 0.224, 0.225])
+        self.logo_path = os.path.join('misc', 'cougar_ai_logo.png')
 
     def _extract_face(self):
 
@@ -81,12 +85,20 @@ class AgePredictorGUI():
 
         with st.container():
             
-            st.title('Cougar AI Age Predictor')
+            img_col, title_col = st.columns((1, 2))
+
+            with img_col:
+
+                st.image(self.logo_path)
+
+            with title_col:
+                
+                st.title('Cougar AI Age Predictor')
 
         with st.container():
 
             # Webcam display
-            self.img_file_buffer = st.camera_input("Take A Picture to Make An Age Prediction")
+            self.img_file_buffer = st.camera_input("Take photo to make an age prediction", label_visibility='hidden')
 
             if self.img_file_buffer is not None:
 

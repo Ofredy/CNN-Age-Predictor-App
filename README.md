@@ -6,9 +6,9 @@ In this project we will build a computer vision application capable of predictin
 
 ![alt text](blob/app_picture.jpg?raw=true)
 
-The goal of the workshop is to give our memebers a fundamental understanding of neural networks and computer vision. Allowing them to take on projects of their own!
+The goal of the workshop is to give our members a fundamental understanding of neural networks and computer vision. Allowing them to take on projects of their own!
 
-The project will be taught in weekly workshops, learning the necessary skills piece by piece until the whole application is put together. The detailed outline of the project can be found as workshop/project_outline.pdf in this github repo. The high level overview of the workshop is as follows:
+The project will be taught in weekly workshops, learning the necessary skills piece by piece until the whole application is put together. The detailed outline of the project can be found as workshop/project_outline.pdf in this github repo. The high level project outline of the workshop is as follows:
   - Week 1: Intro to Machine Learning and Single Layer Networks
   - Week 2: Multilayer Networks
   - Week 3 & 4: Convolutional Neural Networks

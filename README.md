@@ -4,7 +4,7 @@ Welcome to the Cougar AI Spring 2024 Project!
 
 In this project we will build a computer vision application capable of predicting the age of the user through a webcam. We will teach everything needed to understand the application from the ground up. Including convolutional neural networks, transfer learning, resnets, and general user interfaces!
 
-![alt text](https://github.com/Ofredy/CNN-Age-Predictor-App/blob/app_picture.jpg?raw=true)
+![alt text](blob/app_picture.jpg?raw=true)
 
 The goal of the workshop is to give our memebers a fundamental understanding of neural networks and computer vision. Allowing them to take on projects of their own!
 

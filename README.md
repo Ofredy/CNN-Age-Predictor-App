@@ -21,7 +21,7 @@ The dataset used for Age Predictor is the FairFace Datset. And the labels used t
   - Fairface Dataset: https://github.com/joojs/fairface
   - Fairface Dataset Train & Val Labels, The labels are stored in a google drive created by the book's author. Refer to the github block on importing the data: https://github.com/PacktPublishing/Modern-Computer-Vision-with-PyTorch/blob/master/Chapter05/age_gender_prediction.ipynb
 
-To run the age predictor, 
+To run the age predictor:
   - Clone or download the repo.
   -  Create an python environment, and install the following libraries: PyTorch, Streamlit, OpenCV 
   -  Activate your python environment and cd into src. Run the command: "streamlit run main.py". The app will open in your default browser.

@@ -27,4 +27,4 @@ To run the age predictor,
     - PyTorch
     - Streamlit
     - OpenCV
-  3. Activate your python environment and cd into src. Run the command: "streamlit run main.py". The app will open in your default browser.
+  4. Activate your python environment and cd into src. Run the command: "streamlit run main.py". The app will open in your default browser.

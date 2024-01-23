@@ -23,5 +23,5 @@ The dataset used for Age Predictor is the FairFace Datset. And the labels used t
 
 To run the age predictor:
   - Clone or download the repo.
-  -  Create an python environment, and install the following libraries: PyTorch, Streamlit, OpenCV, ONXX, and ONNX Runtime 
+  -  Create an python environment, and install the following libraries: PyTorch, OpenCV, Streamlit, OpenCV, ONXX, and ONNX Runtime 
   -  Activate your python environment and cd into src. Run the command: "streamlit run main.py". The app will open in your default browser.
